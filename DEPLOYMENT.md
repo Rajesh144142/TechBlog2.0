@@ -1,36 +1,165 @@
-# Azure Deployment Guide
+# EC2 Deployment Guide
 
-Deploying the AiBlog application to **Azure Container Apps** - a serverless container platform with a generous free tier.
+Deploying the AiBlog application to **AWS EC2** with Docker Compose.
 
 ## Prerequisites
-- Azure account with free credits ($200 for 30 days)
-- Docker Desktop installed
+- AWS EC2 instance (Amazon Linux 2)
+- SSH access to your EC2 instance
+- Security Group with ports 22 (SSH), 3000 (App) open
 
 ## Steps
 
-### Step 1: Install Azure CLI
+### Step 1: Connect to EC2
 
-The Azure CLI lets you manage Azure resources from the command line.
-
-```powershell
-winget install Microsoft.AzureCLI
+```bash
+ssh -i "C:\path\to\your\demo-keypair.pem" ec2-user@<your-ec2-ip>
 ```
 
-After installation, restart terminal and login:
+**Common Issue:** "Identity file not accessible"  
+**Solution:** Provide the full path to your `.pem` key file.
 
-```powershell
-az login
+---
+
+### Step 2: Check Docker Installation
+
+```bash
+docker --version
 ```
 
-### Step 2: Create a Resource Group
-
-A Resource Group is a container that holds all related Azure resources together. Benefits:
-- **Organization** - Keep all AiBlog resources in one place
-- **Easy cleanup** - Delete the group = delete everything inside
-- **Billing** - Track costs for this project separately
-
-```powershell
-az group create --name aiblog-rg --location eastus
+Docker should already be installed. If not, install with:
+```bash
+sudo yum install -y docker
+sudo systemctl start docker
+sudo systemctl enable docker
 ```
 
-### Step 3: (Next steps coming soon...)
+---
+
+### Step 3: Install Docker Compose
+
+```bash
+docker-compose --version
+```
+
+**Issue:** Docker Compose not found.  
+**Solution:** Install it manually:
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+**Note:** Use `docker-compose` (with hyphen), not `docker compose`.
+
+---
+
+### Step 4: Install Docker Buildx
+
+**Issue:** `compose build requires buildx 0.17 or later`  
+**Solution:** Install buildx manually:
+
+```bash
+mkdir -p ~/.docker/cli-plugins
+curl -SL https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
+chmod +x ~/.docker/cli-plugins/docker-buildx
+```
+
+Then copy for root (since we use `sudo`):
+
+```bash
+sudo mkdir -p /root/.docker/cli-plugins
+sudo cp ~/.docker/cli-plugins/docker-buildx /root/.docker/cli-plugins/docker-buildx
+```
+
+---
+
+### Step 5: Clone the Repository
+
+```bash
+git clone https://github.com/Rajesh144142/TechBlog2.0.git
+cd TechBlog2.0
+```
+
+---
+
+### Step 6: Create Environment File
+
+```bash
+nano server/.env
+```
+
+Add:
+```
+MONGODB_URL=mongodb://mongodb:27017/aiblog
+JWT_SECRET=your-secret-key-here
+```
+
+Save with `Ctrl+O`, Enter, then `Ctrl+X`.
+
+---
+
+### Step 7: Build and Run Containers
+
+```bash
+sudo docker-compose up --build -d
+```
+
+**Issue:** `Bind for 0.0.0.0:80 failed: port is already allocated`  
+**Solution:** Port 80 was in use. Changed to port 3000 in `docker-compose.yml`:
+
+```yaml
+ports:
+  - "3000:80"
+```
+
+Then restart:
+```bash
+sudo docker-compose up -d
+```
+
+---
+
+### Step 8: Seed the Database (Optional)
+
+**Issue:** Running `python seed_blogs.py` directly on EC2 fails with `python: command not found`  
+**Why:** Python is installed inside the Docker container, not on the EC2 host.  
+**Solution:** Run the seed script inside the server container:
+
+```bash
+sudo docker exec -it aiblog-server python seed_blogs.py
+```
+
+---
+
+### Step 9: Access Your Application
+
+Open in browser:
+```
+http://<your-ec2-ip>:3000
+```
+
+**Important:** Make sure port 3000 is open in your EC2 Security Group:
+- AWS Console → EC2 → Security Groups
+- Add inbound rule: Custom TCP, Port 3000, Source 0.0.0.0/0
+
+---
+
+## Useful Commands
+
+```bash
+# View running containers
+sudo docker ps
+
+# View logs
+sudo docker-compose logs -f
+
+# Restart containers
+sudo docker-compose restart
+
+# Stop containers
+sudo docker-compose down
+
+# Pull latest code and rebuild
+git pull
+sudo docker-compose up --build -d
+```
