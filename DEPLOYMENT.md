@@ -144,6 +144,70 @@ http://<your-ec2-ip>:3000
 
 ---
 
+### Step 10: Optimize Memory (Fix Build Crashes) 🚀
+
+**The Problem:**  
+AWS EC2 `t2.micro` instances have only **1GB of RAM**. Modern frontend build processes (like Vite + TypeScript) are memory-intensive. When building the application, the server may run out of memory, causing the build to fail or the entire server to freeze (Out of Memory/OOM).
+
+**The Solution:**  
+We add **Swap Space**. Swap space uses a portion of the hard drive to act as "emergency RAM." This allows the build to complete successfully without needing a more expensive instance.
+
+**Run these commands to add 2GB of Swap Space:**
+
+```bash
+# 1. Create a 2GB swap file on the hard drive
+sudo fallocate -l 2G /swapfile
+
+# 2. Set the correct permissions (only root can read/write)
+sudo chmod 600 /swapfile
+
+# 3. Format the file as a swap area
+sudo mkswap /swapfile
+
+# 4. Enable the swap file immediately
+sudo swapon /swapfile
+
+# 5. Make it permanent (it will survive a server reboot)
+echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+```
+
+*Result: Your server now has 1GB RAM + 2GB Swap = 3GB total available memory.*
+
+---
+
+### Step 11: Monitoring & Verification (HTOP & FREE) 📊
+
+After setting up Swap space, you need a way to verify it is working and monitor your server's health during builds.
+
+#### 1. Quick Check (`free -h`)
+**Why we use it:** To get an instant snapshot of your memory.
+**When to use it:** Right after setting up swap or if you suspect the server is sluggish.
+```bash
+free -h
+```
+*Look for the "Swap" row. It should show 2.0Gi.*
+
+#### 2. Real-Time Visualization (`htop`)
+**Why we use it:** It provides a live, color-coded dashboard of your CPU, RAM, and Swap usage.
+**Why it is required:** During a `docker build`, you need to see if the server is reaching its limits. It helps you "see" the overflow into Swap space in real-time.
+
+**Install it:**
+```bash
+sudo yum install htop -y
+```
+
+**Run it:**
+```bash
+htop
+```
+
+**What to watch for:**
+- **Mem bar:** Will fill up first (up to 949MB).
+- **Swp bar:** Will start filling up only when Mem is full. This is your "Safety Net" in action!
+- **CPU:** Shows which process (like `node` or `mongodb`) is using the most power.
+
+---
+
 ## Useful Commands
 
 ```bash

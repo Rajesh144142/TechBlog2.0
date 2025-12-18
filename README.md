@@ -149,6 +149,12 @@ To enable automatic deployment to EC2, you must add the following secrets in you
 
 ---
 
+### Important: Memory Optimization for EC2
+If your EC2 is a `t2.micro` (1GB RAM), the build might crash. **You must add Swap Space** to prevent this. 
+Follow **Step 10 & 11** in [DEPLOYMENT.md](./DEPLOYMENT.md) to fix this for free and learn how to monitor it.
+
+---
+
 ## Contributing
 
 1. Fork the repo

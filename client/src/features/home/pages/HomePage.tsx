@@ -31,7 +31,7 @@ function HomePage() {
             WebkitTextFillColor: 'transparent',
           }}
         >
-          TechBlog 
+          TechBlog
         </Typography>
         <Typography variant="h6" sx={{ color: isDark ? '#9ca3af' : '#6b7280', mb: 4 }}>
           Discover the latest in technology and programming
