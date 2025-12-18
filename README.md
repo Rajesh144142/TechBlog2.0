@@ -118,6 +118,17 @@ SECRET_KEY=your-secret-key
 
 ---
 
+## CI/CD 🚀
+
+This project uses **GitHub Actions** for Continuous Integration. The workflows are configured with **Path Filtering** to optimize build times:
+
+- **Frontend CI:** Triggered only on changes within the `client/` directory. Builds the React application.
+- **Backend CI:** Triggered only on changes within the `server/` directory. Runs linting and dependency checks.
+
+The workflow files are located in `.github/workflows/`.
+
+---
+
 ## Contributing
 
 1. Fork the repo
