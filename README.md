@@ -127,6 +127,16 @@ This project uses **GitHub Actions** for Continuous Integration. The workflows a
 
 The workflow files are located in `.github/workflows/`.
 
+### How to set up GitHub Actions:
+
+1.  **Push the code:** Simply push the `.github/workflows` directory to your GitHub repository. GitHub will automatically detect the files.
+2.  **View Progress:** Go to your repository on GitHub and click the **"Actions"** tab.
+3.  **Path Filtering in Action:** 
+    - If you push changes to `client/`, only the **Frontend CI** will trigger.
+    - If you push changes to `server/`, only the **Backend CI** will trigger.
+    - If you push changes to both, both will run independently.
+4.  **Status Badges:** You can add status badges to your README to show the current build status (optional).
+
 ---
 
 ## Contributing
