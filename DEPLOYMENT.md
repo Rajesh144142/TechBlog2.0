@@ -1,13 +1,70 @@
 # EC2 Deployment Guide
 
-Deploying the AiBlog application to **AWS EC2** with Docker Compose.
+## Method 1: Docker Compose (Recommended) 🐳
 
-## Prerequisites
-- AWS EC2 instance (Amazon Linux 2)
+Deploying the AiBlog application to **AWS EC2** with Docker Compose. This is the preferred method as it manages the database, backend, and frontend as a single unit.
+
+---
+
+## Method 2: Manual Deployment with PM2 (Alternative) 🚀
+
+Use this method if you want to save even more memory by not using Docker, or if you prefer managing processes individually.
+
+### Prerequisites (PM2)
+- Node.js 20+
+- Python 3.11+
+- MongoDB installed on EC2 (Manually)
+
+### PM2 Steps
+
+#### 1. Install PM2 Globally
+```bash
+sudo npm install -g pm2
+```
+
+#### 2. Backend Setup (FastAPI)
+```bash
+cd ~/TechBlog2.0/server
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+# Start backend with PM2
+pm2 start "venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000" --name aiblog-backend
+```
+
+#### 3. Frontend Setup (React/Vite)
+```bash
+cd ~/TechBlog2.0/client
+npm install
+npm run build
+# Serve the static files using PM2
+pm2 serve dist 3000 --name aiblog-frontend --spa
+```
+
+#### 4. Manage Processes
+```bash
+# View all processes
+pm2 status
+
+# Monitor CPU/RAM in real-time (Visualization)
+pm2 monit
+
+# View logs
+pm2 logs
+
+# Ensure apps restart on server reboot
+pm2 save
+pm2 startup
+```
+
+---
+
+## Prerequisites (Common)
+- AWS EC2 instance (Amazon Linux 2023 / 2)
 - SSH access to your EC2 instance
-- Security Group with ports 22 (SSH), 3000 (App) open
+- Security Group with ports 22 (SSH), 3000 (App), 8000 (API) open
 
-## Steps
+## Docker Steps
 
 ### Step 1: Connect to EC2
 
