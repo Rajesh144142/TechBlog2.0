@@ -1,17 +1,16 @@
 name: Deploy to EC2
 
 on:
-  push:
-    branches: [ main ]
-    # Trigger only when code (not just docs) changes
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - '.github/workflows/**' # Don't redeploy if only workflow files changed
+  workflow_run:
+    workflows: ["Frontend CI", "Backend CI"]
+    types:
+      - completed
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
