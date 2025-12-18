@@ -7,6 +7,11 @@ on:
       - completed
     branches: [main]
 
+# Prevent parallel deployments from fighting for RAM
+concurrency:
+  group: deploy-to-ec2
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,6 +27,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 20m
           script: |
             cd TechBlog2.0
             git pull origin main
