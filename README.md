@@ -137,6 +137,16 @@ The workflow files are located in `.github/workflows/`.
     - If you push changes to both, both will run independently.
 4.  **Status Badges:** You can add status badges to your README to show the current build status (optional).
 
+### Required GitHub Secrets:
+
+To enable automatic deployment to EC2, you must add the following secrets in your GitHub repository (**Settings > Secrets and variables > Actions**):
+
+| Secret Name | Description | Example |
+|-------------|-------------|---------|
+| `EC2_HOST` | Your EC2 Public IP | `54.x.x.x` |
+| `EC2_USERNAME` | SSH Username | `ec2-user` |
+| `EC2_SSH_KEY` | Content of your `.pem` key | `-----BEGIN RSA PRIVATE KEY-----...` |
+
 ---
 
 ## Contributing
